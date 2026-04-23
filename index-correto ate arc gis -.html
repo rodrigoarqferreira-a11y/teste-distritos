@@ -1,0 +1,1592 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+        <!-- leaflet-image para captura do mapa -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-image/0.4.0/leaflet-image.js"></script>
+        <style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+#map {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+/* ===== TELA INICIAL ===== */
+
+#tela-inicial{
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: url('img/contagem.webp') no-repeat center center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #FFFFFF;   /* fundo para preencher laterais */
+    z-index: 999999; /* aumenta aqui */
+    image-rendering: auto;
+}
+
+.overlay{
+    width:100%;
+    height:100%;
+    /* gradiente ao invés de preto chapado */
+    background: linear-gradient(
+        rgba(0,0,0,0.65),
+        rgba(0,0,0,0.75)
+    );
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.conteudo-inicial{
+    text-align:center;
+    color:white;
+    font-family:'Inter', 'Segoe UI', sans-serif;
+    max-width:650px;
+
+    animation: fadeUp 1s ease;
+}
+
+/* TÍTULO PRINCIPAL */
+.conteudo-inicial h1{
+    font-size:42px;
+    font-weight:700;
+    margin-bottom:15px;
+    letter-spacing:0.5px;
+
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+/* SUBTÍTULO */
+.subtitulo{
+    font-size:18px;
+    line-height:1.6;
+    margin-bottom:25px;
+    opacity:0.85;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    color: rgba(255,228,196);
+}
+
+/* VERSÃO */
+.versao{
+    font-size:16px;
+    margin-bottom:30px;
+    opacity:0.6;
+    letter-spacing:1px;
+    color: rgba(255,228,196);
+}
+
+/* BOTÃO MODERNO */
+.conteudo-inicial button{
+    padding:16px 34px;
+    font-size:14px;
+    border:none;
+    border-radius:8px;
+    background: linear-gradient(135deg, #ff6a00, #ee0979);
+    color:white;
+    cursor:pointer;
+    font-weight:600;
+    letter-spacing:0.5px;
+
+    box-shadow: 
+        0 6px 20px rgba(0,0,0,0.4),
+        0 0 12px rgba(255,100,0,0.4);
+
+    transition: all 0.3s ease;
+}
+
+/* HOVER */
+.conteudo-inicial button:hover{
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 
+        0 10px 30px rgba(0,0,0,0.5),
+        0 0 18px rgba(255,100,0,0.6);
+}
+
+/* CLICK */
+.conteudo-inicial button:active{
+    transform: scale(0.96);
+}
+
+/* ANIMAÇÃO */
+@keyframes fadeUp{
+    from{
+        opacity:0;
+        transform: translateY(30px);
+    }
+    to{
+        opacity:1;
+        transform: translateY(0);
+    }
+}
+
+.logo-topo{
+    position:absolute;
+    top:25px;
+    left:30px;
+    z-index:1000000;
+}
+
+.logo-topo img{
+    width:110px;
+    height:auto;
+    opacity:0.95;
+    transition:0.3s;
+}
+
+/* leve efeito ao passar o mouse */
+.logo-topo img:hover{
+    opacity:1;
+    transform: scale(1.03);
+}
+        #painel-filtros{
+    position:absolute;
+    top:10px;
+    right:10px;
+    z-index:9999; /* MUITO IMPORTANTE */
+    background:white;
+    padding:12px;
+    border-radius:8px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.3);
+    font-family:'Segoe UI';
+    width:200px;
+}
+.rodape-inicial{
+    position:absolute;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+    width:90%;
+    max-width:900px;
+
+    color: rgba(255,255,255,0.85);
+    font-family:'Inter', 'Segoe UI', sans-serif;
+    font-size:12px;
+    line-height:1.5;
+
+    text-align:left;
+
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
+
+    padding:12px 18px;
+    border-radius:8px;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.rodape-inicial p{
+    margin:4px 0;
+}          
+
+#painel-filtros h3{
+    margin-top:0;
+    font-size:14px;
+    color:#1a3a5c;
+}
+
+#painel-filtros label{
+    font-size:12px;
+    display:block;
+    margin-top:8px;
+}
+
+#painel-filtros select,
+#painel-filtros button{
+    width:100%;
+    margin-top:5px;
+    padding:6px;
+    font-size:12px;
+}
+
+        /* ========== POPUP CUSTOMIZADO ========== */
+        .lote-popup {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-width: 270px;
+        }
+        .popup-header {
+            background: #1a3a5c;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 6px 6px 0 0;
+            margin: -14px -20px 12px -20px;
+        }
+        .popup-badge {
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 1;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .popup-header h3 {
+            margin: 0;
+            font-size: 11px;
+            font-weight: 400;
+            line-height: 1.3;
+            opacity: 0.85;
+        }
+        .popup-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 10px;
+        }
+        .popup-row:last-of-type { border-bottom: none; }
+        .popup-label {
+            font-size: 11px;
+            color: #777;
+            white-space: nowrap;
+            padding-top: 1px;
+        }
+        .popup-area{
+font-size:15px;
+font-weight:700;
+color:#e85d04;
+}
+        .popup-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a3a5c;
+            text-align: right;
+            word-break: break-word;
+            max-width: 170px;
+        }
+        .popup-obs {
+            font-size: 11px;
+            color: #555;
+            font-style: italic;
+            margin-top: 6px;
+            padding: 6px 8px;
+            background: #f8f8f8;
+            border-radius: 4px;
+            border-left: 3px solid #1a3a5c;
+        }
+        .btn-relatorio {
+            width: 100%;
+            margin-top: 12px;
+            padding: 10px;
+            background: #e85d04;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            transition: background 0.2s;
+        }
+        .btn-relatorio:hover { background: #c94e00; }
+        .btn-relatorio:disabled {
+            background: #aaa;
+            cursor: wait;
+        }
+
+        /* ========== IMPRESSÃO / RELATÓRIO PDF ========== */
+        #relatorio-print { display: none; }
+        @media print {
+            body * { visibility: hidden !important; }
+            #relatorio-print, #relatorio-print * { visibility: visible !important; }
+            #relatorio-print {
+                display: block !important;
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%;
+                padding: 40px;
+                background: white;
+                box-sizing: border-box;
+            }
+        }
+        /* ===== LEGENDA PROFISSIONAL DO MAPA ===== */
+
+.legenda-mapa{
+background: rgba(255,255,255,0.92);
+padding:12px 14px;
+border-radius:8px;
+box-shadow:0 2px 10px rgba(0,0,0,0.25);
+font-size:13px;
+line-height:18px;
+color:#333;
+font-family:'Segoe UI', Arial, sans-serif;
+}
+
+.legenda-titulo{
+font-weight:700;
+margin-bottom:8px;
+color:#1a3a5c;
+}
+
+.legenda-item{
+display:flex;
+align-items:center;
+margin-bottom:7px;
+}
+
+.legenda-cor{
+width:14px;
+height:14px;
+display:inline-block;
+margin-right:8px;
+border-radius:2px;
+}
+
+.ativo{
+background:#4a90e2;
+}
+
+.ocioso{
+background:#e57373;
+}
+
+.legenda-linha{
+width:18px;
+height:3px;
+display:inline-block;
+margin-right:8px;
+}
+
+.distrito{
+background:#2ecc71;
+}
+
+.autocomplete-list{
+    max-height:150px;
+    overflow-y:auto;
+    background:white;
+    border:1px solid #ccc;
+    border-radius:4px;
+    margin-top:2px;
+    display:none;
+    position:relative;
+    z-index:9999;
+}
+
+.autocomplete-item{
+    padding:6px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.autocomplete-item:hover{
+    background:#f0f0f0;
+}
+
+        </style>
+        <title>Distritos Industriais de Contagem</title>
+    </head>
+    <body>
+
+        <div id="tela-inicial">
+    <div class="logo-topo">
+    <img src="https://portal.contagem.mg.gov.br/img/logo_mobile.svg?1759316296">
+</div>
+    <div class="overlay">
+        <div class="conteudo-inicial">
+            <h1>Distritos Industriais</h1>
+<p style="font-size:20px; font-weight:300; margin-top:-10px;">
+    Município de Contagem
+</p>
+            <p class="subtitulo">
+                Secretaria de Desenvolvimento Econômico – SEDECON<br>
+                Superintendência de Gestão de Distritos e Polos<br>
+                Superintendência de Inovação e Informações Estratégicas
+            </p>
+
+            <p class="versao">Versão Abril/2026</p>
+
+            <button onclick="iniciarSistema()">Acessar Sistema</button>
+        </div>
+      <div class="rodape-inicial">
+    <p>
+        <strong>Observação:</strong> Limite dos Lotes conforme as Plantas de Parcelamento do Solo<br>
+        <strong>Última atualização:</strong> 25/09/2025
+    </p>
+
+    <p>
+        <strong>Erros:</strong> Informe a Superintendência de Inovação e Informações Estratégicas 
+        caso haja inconsistências ou necessidade de atualização.
+    </p>
+</div>
+    </div>
+</div>
+        <div id="map"></div>
+        <div id="painel-filtros">
+    <h3>Filtros</h3>
+
+    <label>Situação:</label>
+    <select id="filtro-situacao">
+        <option value="">Todos</option>
+        <option value="ATIVO">Ativo</option>
+        <option value="OCIOSO">Ocioso</option>
+    </select>
+
+    <label>Distrito:</label>
+    <select id="filtro-distrito">
+        <option value="">Todos</option>
+    </select>
+
+<label>Proprietário:</label>
+<input type="text" id="filtro-proprietario" placeholder="Digite o nome...">
+<div id="lista-proprietarios" class="autocomplete-list"></div>
+
+    <label>Tipo de Imóvel:</label>
+    <select id="filtro-tipo">
+        <option value="">Todos</option>
+    </select>
+
+    <button onclick="aplicarFiltros()">Aplicar</button>
+    <button onclick="limparFiltros()">Limpar</button>
+</div>
+        <div id="relatorio-print"></div>
+
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="data/RegioMetropolitana_1.js"></script>
+        <script src="data/LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6.js"></script>
+        <script src="data/LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7.js"></script>
+        <script src="data/LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8.js"></script>
+        <script src="data/LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9.js"></script>
+        <script src="data/LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10.js"></script>
+        <script src="data/LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11.js"></script>
+        <script src="data/LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12.js"></script>
+
+        <script>
+
+function iniciarSistema(){
+    document.getElementById("tela-inicial").style.display = "none";
+
+    var mapDiv = document.getElementById("map");
+    mapDiv.style.display = "block";
+
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 200);
+}     // ========== CONFIGURAÇÕES ==========
+        var OSM_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+        // ========== RELATÓRIO SIMPLES ==========
+function gerarRelatorio(p, layer) {
+
+var hoje = new Date().toLocaleDateString('pt-BR');
+
+var logo = "https://portal.contagem.mg.gov.br/img/logo_mobile.svg?1759316296";
+
+function val(v){
+return (v !== null && v !== undefined && v !== '') ? v : '—';
+}
+
+function formatarArea(valor) {
+    if (valor === null || valor === undefined || valor === '') return '—';
+
+    var num = Number(valor);
+
+    if (isNaN(num)) return valor;
+
+    return num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + ' m²';
+}
+function getCorZoneamento(z) {
+    if (!z) return "#999";
+
+    z = z.toUpperCase();
+
+    if (z.includes("ZAE1 - ZONA DE ATIVIDADE ECONÔMICA 1")) return "#9216c7";
+    if (z.includes("ZAE2 - ZONA DE ATIVIDADE ECONÔMICA 2")) return "#deb3f2";
+    if (z.includes("ZEIS1 - ZONA DE ESPECIAL INTERESSE SOCIAL 1")) return "#a7c636";
+    if (z.includes("ZUD3 - ZONA DE USOS DIVERSIFICADOS 3")) return "#6e0519";
+    if (z.includes("ZPA1 - ZONA DE PROTEÇÃO AMBIENTAL 1")) return "#1bbf23";
+    if (z.includes("ZUD4 - ZONA DE USOS DIVERSIFICADOS 4")) return "#db0b1c";
+    if (z.includes("ZEIS2 - ZONA DE ESPECIAL INTERESSE SOCIAL 2")) return "#f5e400";
+
+    return "#888";
+}
+var bounds = layer.getBounds();
+var center = bounds.getCenter();
+
+var arcgisUrl = "https://www.arcgis.com/apps/mapviewer/index.html?webmap=54e46ff04b914c14aaa280b3bf83a03b"
++ "&center=" + center.lng + "," + center.lat
++ "&level=19"
++ "&marker=" + center.lng + "," + center.lat;
+var html = `
+<html>
+<head>
+<title>Relatório do Lote</title>
+
+<style>
+
+#painel-filtros{
+position:absolute;
+top:10px;
+right:10px;
+z-index:1000;
+background:white;
+padding:12px;
+border-radius:8px;
+box-shadow:0 2px 10px rgba(0,0,0,0.3);
+font-family:'Segoe UI';
+width:200px;
+}
+
+#painel-filtros h3{
+margin-top:0;
+font-size:14px;
+color:#1a3a5c;
+}
+
+#painel-filtros label{
+font-size:12px;
+display:block;
+margin-top:8px;
+}
+
+#painel-filtros select,
+#painel-filtros button{
+width:100%;
+margin-top:5px;
+padding:6px;
+font-size:12px;
+}
+
+*{
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+}
+
+@page{
+size:A4;
+margin:10mm;
+}
+
+html, body{
+margin:0;
+padding:0;
+}
+
+/* ===== FUNDO DA PÁGINA (PASSO 2) ===== */
+body{
+background:#eaeaea;
+}
+
+/* ===== BARRA SUPERIOR ===== */
+.barra{
+height:55px;
+width:100%;
+background: linear-gradient(
+90deg,
+#082a4d 0%,
+#0b3d6d 50%,
+#1f74c9 100%
+);
+}
+
+/* ===== CONTAINER CENTRAL (PASSO 1) ===== */
+.container{
+width:100%;
+max-width:850px;
+margin:30px auto;
+padding:30px;
+background:white;
+box-shadow:0 0 15px rgba(0,0,0,0.15);
+border-radius:6px;
+}
+
+/* ===== HEADER ===== */
+.header{
+display:flex;
+justify-content:center;
+}
+
+.header-inner{
+display:flex;
+align-items:center;
+gap:20px;
+}
+
+.logo{
+width:80px;
+height:auto;
+}
+
+.header-texto{
+text-align:left;
+}
+
+.titulo{
+font-size:18px;
+font-weight:700;
+color:#1a3a5c;
+}
+
+.subtitulo{
+font-size:12px;
+color:#444;
+}
+
+/* ===== LINHA DECORATIVA ===== */
+.linha-header{
+width:100%;
+height:4px;
+background: linear-gradient(90deg, #082a4d, #1f74c9);
+margin:10px 0 20px 0;
+}
+
+/* ===== TÍTULOS ===== */
+h1{
+margin-top:20px;
+font-size:20px;
+color:#1a3a5c;
+text-align:center;
+}
+
+h2{
+margin-top:20px;
+font-size:15px;
+color:#1a3a5c;
+}
+
+/* ===== TABELAS ===== */
+.tabela-relatorio{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+font-size:13px;
+}
+
+.tabela-relatorio td{
+border:1px solid #dcdcdc;
+padding:8px;
+}
+
+.tabela-relatorio tr td:first-child{
+background:#f4f6f9;
+width:35%;
+font-weight:600;
+}
+
+/* ===== BOTÃO ===== */
+.botaoPDF{
+margin-top:25px;
+background:#0b3d6d;
+color:white;
+border:none;
+padding:12px 20px;
+font-size:14px;
+cursor:pointer;
+border-radius:4px;
+}
+
+.botaoPDF:hover{
+background:#072b4d;
+}
+
+/* ===== FOOTER ===== */
+.footer{
+margin-top:50px;
+font-size:13px;
+color:#666;
+line-height:1.6;
+border-top:1px solid #ddd;
+padding-top:15px;
+}
+
+/* ===== IMPRESSÃO (PASSO 3) ===== */
+@media print{
+
+body{
+background:white;
+}
+
+.container{
+box-shadow:none;
+margin:0;
+max-width:100%;
+padding:20px;
+}
+
+.botaoPDF{
+display:none;
+}
+
+.paginaMapa{
+page-break-before: always;
+}
+
+.tabela-relatorio{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+font-size:13px;
+}
+
+.tabela-relatorio td{
+border:1px solid #dcdcdc;
+padding:8px;
+}
+
+.tabela-relatorio tr td:first-child{
+background:#f4f6f9;
+width:35%;
+font-weight:600;
+}
+
+}
+</style>
+
+<div class="header">
+
+    <div class="header-inner">
+
+        <img class="logo" src="${logo}">
+
+        <div class="header-texto">
+            <div class="titulo">Prefeitura de Contagem</div>
+
+            <div class="subtitulo">
+                Secretaria de Desenvolvimento Econômico – SEDECON
+            </div>
+
+            <div class="subtitulo">
+                Superintendência de Gestão de Distritos e Polos
+            </div>
+
+            <div class="subtitulo">
+                Superintendência de Inovação e Informações Estratégicas
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="linha-header"></div>
+
+<h1 style="text-align:center;">
+Sistema de Consulta de Lotes dos Distritos Industriais de Contagem
+</h1>
+
+<h2 style="text-align:center;">
+Relatório do Lote
+</h2>
+
+<p>Emitido em ${hoje}</p>
+
+
+<h2 style="margin-top:20px;">Identificação do Lote</h2>
+
+<table class="tabela-relatorio">
+<tr>
+<td><b>Distrito Industrial</b></td>
+<td>${val(p['distrito'] || p['Distrito'])}</td>
+</tr>
+
+<tr>
+<td><b>Quadra</b></td>
+<td>${val(p['quadra'] || p['quadra-of'])}</td>
+</tr>
+
+<tr>
+<td><b>Lote</b></td>
+<td>${val(p['lote'] || p['lote-of'])}</td>
+</tr>
+
+<tr>
+<td><b>Área do Lote</b></td>
+<td>${formatarArea(p['area'])}</td>
+</tr>
+
+<tr>
+<td>Proprietário</td>
+<td>${val(p['proprietar'] || p['Proprietar'])}</td>
+</tr>
+
+<tr>
+<td>Tipo do Imóvel</td>
+<td>${val(p['tipo'] || p['Tipo'])}</td>
+</tr>
+
+<tr>
+<td>Matrícula</td>
+<td>${val(p['matricula'] || p['Matricula'])}</td>
+</tr>
+
+<tr>
+<td>Ocupante</td>
+<td>${val(p['ocupante'])}</td>
+</tr>
+
+<tr>
+<td>Observação</td>
+<td>${val(p['observac_1'] || p['observa'])}</td>
+</tr>
+</table>
+
+<h2 style="margin-top:25px;">Situação Jurídica e Urbanística</h2>
+
+<table class="tabela-relatorio">
+<tr>
+<td>Zoneamento</td>
+<td>
+    <span style="
+        display:inline-block;
+        padding:4px 10px;
+        border-radius:4px;
+        color:white;
+        font-weight:bold;
+        background:${getCorZoneamento(p['zoneamento'])};
+    ">
+        ${val(p['zoneamento'])}
+    </span>
+</td>
+</tr>
+
+<tr>
+<td>Declaração de Quitação CODEMIG</td>
+<td>${val(p['CODEMIG'] || p['codemig'])}</td>
+</tr>
+
+<tr>
+<td>Doação do Lote</td>
+<td>${val(p['doacao'] || p['DOACAO'])}</td>
+</tr>
+
+</table>
+
+<div class="paginaMapa">
+<h2>Localização do Lote</h2>
+<iframe 
+  src="${arcgisUrl}" 
+  style="width:100%; height:500px; border:none;">
+</iframe>
+</div>
+
+<button class="botaoPDF" onclick="window.print()">
+Baixar / Imprimir PDF
+</button>
+
+<div class="observacoesGerais" style="margin-top:40px; padding:15px; border:1px solid #ddd; background:#fafafa; border-left:5px solid #c94e00; font-size:13px; line-height:1.5;">
+    <strong>OBSERVAÇÕES GERAIS</strong>
+
+    <p>1) O DOCUMENTO NÃO DEVE SER USADO COMO ÚNICA FONTE NA OBSERVÂNCIA DE PARÂMETROS.</p>
+    <p>2) AS INFORMAÇÕES DEVEM SER VALIDADAS JUNTO AOS ÓRGÃOS COMPETENTES.</p>
+</div>
+
+<div class="footer">
+
+<strong>Secretaria de Desenvolvimento Econômico – SEDECON</strong><br>
+Rua Haeckel Ben-Hur Salvador, 180 – Cinco<br>
+Contagem – MG
+
+</div>
+
+</div>
+
+</body>
+</html>
+`;
+
+var w = window.open("", "_blank");
+w.document.write(html);
+w.document.close();
+
+}
+
+
+        // ========== FUNÇÃO GLOBAL: MONTAR POPUP DOS LOTES ==========
+        function buildLotePopup(p, layer) {
+            var distrito   = p['distrito']   || p['Distrito']   || 'Distrito Industrial';
+            var quadra     = p['quadra']     || p['quadra-of']  || 'N/D';
+            var lote       = p['lote']       || p['lote-of']    || 'N/D';
+            var area       = p['area']       !== undefined ? p['area'] : null;
+            var proprietar = p['proprietar'] || p['Proprietar'] || null;
+            var ocupante   = p['ocupante']   || null;
+            var obs        = p['observac_1'] || p['observa']    || null;
+
+            function formatarArea(valor) {
+    if (valor === null || valor === undefined || valor === '') return 'Não informado';
+
+    var num = Number(valor);
+
+    if (isNaN(num)) return valor;
+
+    return num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + ' m²';
+}
+
+var areaStr = formatarArea(area);
+
+            var obsStr = obs || 'Não informado';
+
+            // Guarda referência da layer para captura
+            var layerId = 'layer_' + Math.random().toString(36).substr(2, 9);
+            window._loteLayerRef = window._loteLayerRef || {};
+            window._loteLayerRef[layerId] = layer;
+
+            var propsJson = JSON.stringify(p).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+            return '<div class="lote-popup">'
+                + '<div class="popup-header">'
+                    + '<span class="popup-badge">' + distrito + '</span>'
+                    + '<h3>Quadra ' + quadra + ' &mdash;Lote ' + lote + '</h3>'
+                + '</div>'
+                + '<div class="popup-body">'
+                    + '<div class="popup-row">'
+                        + '<span class="popup-label">📐 Área</span>'
+                        + '<span class="popup-value">' + areaStr + '</span>'
+                    + '</div>'
+                    + '<div class="popup-row">'
+                        + '<span class="popup-label">👤 Proprietário</span>'
+                        + '<span class="popup-value">' + (proprietar || 'Não informado') + '</span>'
+                    + '</div>'
+                    + '<div class="popup-row">'+ '<span class="popup-label">🏭 Ocupante</span>'
+                        + '<span class="popup-value">' + (ocupante || 'Não informado') + '</span>'
+                    + '</div>'
+                    + '<div class="popup-row">' + '<span class="popup-label">📝 Observação</span>'
+                        + '<span class="popup-value">' + obsStr + '</span>'
+                    + '</div>'
+                 + '<button class="btn-relatorio" onclick="gerarRelatorio(JSON.parse(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify(p)) + '\')), window._loteLayerRef[\'' + layerId + '\'])">📄 Gerar Relatório PDF</button>'
+            + '</div>';
+        }
+
+        // ========== HIGHLIGHT ==========
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+            if (e.target.feature.geometry.type === 'LineString' || e.target.feature.geometry.type === 'MultiLineString') {
+                highlightLayer.setStyle({ color: 'rgba(255,255,0,1.00)' });
+            } else {
+                highlightLayer.setStyle({ fillColor: 'rgba(255,255,0,1.00)', fillOpacity: 1 });
+            }
+        }
+
+        // ========== MAPA ==========
+        var map = L.map('map', {
+            preferCanvas: true,
+            center: [-19.9317, -44.0536],
+            zoom: 13,
+            scrollWheelZoom: true,
+            zoomControl: true
+        });
+        
+        // ===== AJUSTES DE INTERAÇÃO DO MAPA =====
+
+// evita zoom acidental com duplo clique
+map.doubleClickZoom.disable();
+
+// melhora comportamento em celular
+map.tap = false;
+
+// evita seleção acidental ao clicar rápido
+map.boxZoom.disable();
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+
+        function removeEmptyRowsFromPopupContent(content, feature) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var rows = tempDiv.querySelectorAll('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var td = rows[i].querySelector('td.visible-with-data');
+                var key = td ? td.id : '';
+                if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                    rows[i].parentNode.removeChild(rows[i]);
+                }
+            }
+            return tempDiv.innerHTML;
+        }
+        function addClassToPopupIfMedia(content, popup) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var imgTd = tempDiv.querySelector('td img');
+            if (imgTd) {
+                var src = imgTd.getAttribute('src');
+                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() { popup.update(); }, 10);
+                }
+            } else {
+                popup._contentNode.classList.remove('media');
+            }
+        }
+
+        var zoomControl = L.control.zoom({ position: 'topleft' }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {}
+
+        // ========== BASEMAP GOOGLE HYBRID ==========
+        map.createPane('pane_GoogleHybrid_0');
+        map.getPane('pane_GoogleHybrid_0').style.zIndex = 400;
+        var layer_GoogleHybrid_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleHybrid_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 1, maxZoom: 28, minNativeZoom: 0, maxNativeZoom: 20
+        });
+        map.addLayer(layer_GoogleHybrid_0);
+
+        // ========== CAMADA 1: Região Metropolitana ==========
+        function pop_RegioMetropolitana_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) { for (var i in e.target._eventParents) { if (typeof e.target._eventParents[i].resetStyle === 'function') e.target._eventParents[i].resetStyle(e.target); } },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>'
+                + '<tr><td colspan="2">' + (feature.properties['CD_MUN']   !== null ? autolinker.link(String(feature.properties['CD_MUN']))   : '') + '</td></tr>'
+                + '<tr><td colspan="2">' + (feature.properties['NM_MUN']   !== null ? autolinker.link(String(feature.properties['NM_MUN']))   : '') + '</td></tr>'
+                + '<tr><td colspan="2">' + (feature.properties['SIGLA_UF'] !== null ? autolinker.link(String(feature.properties['SIGLA_UF'])) : '') + '</td></tr>'
+                + '<tr><td colspan="2">' + (feature.properties['AREA_KM2'] !== null ? autolinker.link(String(feature.properties['AREA_KM2'])) : '') + '</td></tr>'
+                + '</table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
+            layer.bindPopup(content, { maxHeight: 400 });
+        }
+        function style_RegioMetropolitana_1_0() {
+            return { pane: 'pane_RegioMetropolitana_1', opacity: 1, color: 'rgba(0,0,0,1.0)', dashArray: '', lineCap: 'butt', lineJoin: 'miter', weight: 2.0, fill: true, fillOpacity: 1, fillColor: 'rgba(148,120,94,0.886)', interactive: false };
+        }
+        map.createPane('pane_RegioMetropolitana_1');
+        map.getPane('pane_RegioMetropolitana_1').style.zIndex = 401;
+        map.getPane('pane_RegioMetropolitana_1').style['mix-blend-mode'] = 'normal';
+        var layer_RegioMetropolitana_1 = new L.geoJson(json_RegioMetropolitana_1, {
+            attribution: '', interactive: false, dataVar: 'json_RegioMetropolitana_1',
+            layerName: 'layer_RegioMetropolitana_1', pane: 'pane_RegioMetropolitana_1',
+            onEachFeature: pop_RegioMetropolitana_1, style: style_RegioMetropolitana_1_0,
+        });
+        bounds_group.addLayer(layer_RegioMetropolitana_1);
+        map.addLayer(layer_RegioMetropolitana_1);
+
+
+         // ========== CAMADAS 6–12: Limites e Município ==========
+        function pop_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6(feature, layer) {
+            layer.on({ mouseout: function(e) { for (var i in e.target._eventParents) { if (typeof e.target._eventParents[i].resetStyle === 'function') e.target._eventParents[i].resetStyle(e.target); } }, mouseover: highlightFeature });
+            var c = '<table><tr><td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(String(feature.properties['id'])) : '') + '</td></tr><tr><td colspan="2">' + (feature.properties['nome'] !== null ? autolinker.link(String(feature.properties['nome'])) : '') + '</td></tr></table>';
+            layer.bindPopup(c, { maxHeight: 400 });
+        }
+        function style_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6_0() {
+            return { pane: 'pane_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6', opacity: 1, color: 'rgba(22,213,82,1.0)', dashArray: '15.0,3.0', lineCap: 'butt', lineJoin: 'miter', weight: 3.0, fill: true, fillOpacity: 1, fillColor: 'rgba(227,26,28,0.0)', interactive: false };
+        }
+        map.createPane('pane_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6');
+        map.getPane('pane_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6').style.zIndex = 406;
+        map.getPane('pane_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6').style['mix-blend-mode'] = 'normal';
+        var layer_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6 = new L.geoJson(json_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6, { attribution: '', interactive: false, dataVar: 'json_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6', layerName: 'layer_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6', pane: 'pane_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6', onEachFeature: pop_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6, style: style_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6_0 });
+        bounds_group.addLayer(layer_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6);
+        map.addLayer(layer_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6);
+
+        function pop_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7(feature, layer) {
+            layer.on({ mouseout: function(e) { for (var i in e.target._eventParents) { if (typeof e.target._eventParents[i].resetStyle === 'function') e.target._eventParents[i].resetStyle(e.target); } }, mouseover: highlightFeature });
+            var props = ['id','REGIONAL','GESTÃO','FUNDACÃO','DISTRITO','Nome_bacia','ZONA_SIGLA','Nome_zonea','Nome_abrev'];
+            var c = '<table>' + props.map(function(k){ return '<tr><td colspan="2">' + (feature.properties[k] !== null ? autolinker.link(String(feature.properties[k])) : '') + '</td></tr>'; }).join('') + '</table>';
+            layer.bindPopup(c, { maxHeight: 400 });
+        }
+        function style_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7_0() {
+            return { pane: 'pane_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7', opacity: 1, color: 'rgba(22,213,82,1.0)', dashArray: '25.0,5.0', lineCap: 'butt', lineJoin: 'miter', weight: 5.0, fill: true, fillOpacity: 1, fillColor: 'rgba(227,26,28,0.0)', interactive: false };
+        }
+        map.createPane('pane_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7');
+        map.getPane('pane_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7').style.zIndex = 407;
+        map.getPane('pane_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7').style['mix-blend-mode'] = 'normal';
+        var layer_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7 = new L.geoJson(json_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7, { attribution: '', interactive: false, dataVar: 'json_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7', layerName: 'layer_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7', pane: 'pane_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7', onEachFeature: pop_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7, style: style_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7_0 });
+        bounds_group.addLayer(layer_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7);
+        map.addLayer(layer_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7);
+
+        function pop_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8(feature, layer) {
+            layer.on({ mouseout: function(e) { for (var i in e.target._eventParents) { if (typeof e.target._eventParents[i].resetStyle === 'function') e.target._eventParents[i].resetStyle(e.target); } }, mouseover: highlightFeature });
+            layer.bindPopup('<table></table>', { maxHeight: 400 });
+        }
+        function style_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8_0() {
+            return { pane: 'pane_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8', opacity: 1, color: 'rgba(22,213,82,1.0)', dashArray: '25.0,5.0', lineCap: 'butt', lineJoin: 'miter', weight: 5.0, fill: true, fillOpacity: 1, fillColor: 'rgba(227,26,28,0.0)', interactive: false };
+        }
+        map.createPane('pane_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8');
+        map.getPane('pane_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8').style.zIndex = 408;
+        map.getPane('pane_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8').style['mix-blend-mode'] = 'normal';
+        var layer_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8 = new L.geoJson(json_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8, { attribution: '', interactive: false, dataVar: 'json_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8', layerName: 'layer_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8', pane: 'pane_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8', onEachFeature: pop_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8, style: style_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8_0 });
+        bounds_group.addLayer(layer_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8);
+        map.addLayer(layer_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8);
+
+        function pop_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9(feature, layer) {
+            layer.on({ mouseout: function(e) { for (var i in e.target._eventParents) { if (typeof e.target._eventParents[i].resetStyle === 'function') e.target._eventParents[i].resetStyle(e.target); } }, mouseover: highlightFeature });
+            var props = ['INSCRICAO','BAIRRO','QUADRA_OFI','LOTE_OFICI','APROVADO','OBSERVACAO','CP','AREA','MATR','DECRETO','REGIAO_ADM'];
+            var c = '<table>' + props.map(function(k){ return '<tr><td colspan="2">' + (feature.properties[k] !== null ? autolinker.link(String(feature.properties[k])) : '') + '</td></tr>'; }).join('') + '</table>';
+            layer.bindPopup(c, { maxHeight: 400 });
+        }
+        function style_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9_0() {
+            return { pane: 'pane_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9', opacity: 1, color: 'rgba(22,213,82,1.0)', dashArray: '15.0,3.0', lineCap: 'butt', lineJoin: 'miter', weight: 3.0, fill: true, fillOpacity: 1, fillColor: 'rgba(227,26,28,0.0)', interactive: false };
+        }
+        map.createPane('pane_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9');
+        map.getPane('pane_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9').style.zIndex = 409;
+        map.getPane('pane_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9').style['mix-blend-mode'] = 'normal';
+        var layer_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9 = new L.geoJson(json_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9, { attribution: '', interactive: false, dataVar: 'json_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9', layerName: 'layer_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9', pane: 'pane_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9', onEachFeature: pop_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9, style: style_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9_0 });
+        bounds_group.addLayer(layer_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9);
+        map.addLayer(layer_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9);
+
+        function pop_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10(feature, layer) {
+            layer.on({ mouseout: function(e) { for (var i in e.target._eventParents) { if (typeof e.target._eventParents[i].resetStyle === 'function') e.target._eventParents[i].resetStyle(e.target); } }, mouseover: highlightFeature });
+            var props = ['id','REGIONAL','GESTÃO','FUNDACÃO','DISTRITO','Nome_bacia','Nome_zonea','AREA','PERÍMETRO'];
+            var c = '<table>' + props.map(function(k){ return '<tr><td colspan="2">' + (feature.properties[k] !== null ? autolinker.link(String(feature.properties[k])) : '') + '</td></tr>'; }).join('') + '</table>';
+            layer.bindPopup(c, { maxHeight: 400 });
+        }
+        function style_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10_0() {
+            return { pane: 'pane_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10', opacity: 1, color: 'rgba(22,213,82,1.0)', dashArray: '15.0,3.0', lineCap: 'butt', lineJoin: 'miter', weight: 3.0, fill: true, fillOpacity: 1, fillColor: 'rgba(227,26,28,0.0)', interactive: false };
+        }
+        map.createPane('pane_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10');
+        map.getPane('pane_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10').style.zIndex = 410;
+        map.getPane('pane_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10').style['mix-blend-mode'] = 'normal';
+        var layer_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10 = new L.geoJson(json_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10, { attribution: '', interactive: false, dataVar: 'json_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10', layerName: 'layer_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10', pane: 'pane_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10', onEachFeature: pop_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10, style: style_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10_0 });
+        bounds_group.addLayer(layer_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10);
+        map.addLayer(layer_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10);
+
+        function pop_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11(feature, layer) {
+            layer.on({ mouseout: function(e) { for (var i in e.target._eventParents) { if (typeof e.target._eventParents[i].resetStyle === 'function') e.target._eventParents[i].resetStyle(e.target); } }, mouseover: highlightFeature });
+            var props = ['id','REGIONAL','GESTÃO','FUNDACÃO','DISTRITO','Nome_bacia','Nome_zonea','ZONA_SIGLA','AREA','PERÍMETRO'];
+            var c = '<table>' + props.map(function(k){ return '<tr><td colspan="2">' + (feature.properties[k] !== null ? autolinker.link(String(feature.properties[k])) : '') + '</td></tr>'; }).join('') + '</table>';
+            layer.bindPopup(c, { maxHeight: 400 });
+        }
+        function style_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11_0() {
+            return { pane: 'pane_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11', opacity: 1, color: 'rgba(22,213,82,1.0)', dashArray: '15.0,3.0', lineCap: 'butt', lineJoin: 'miter', weight: 3.0, fill: true, fillOpacity: 1, fillColor: 'rgba(227,26,28,0.0)', interactive: false };
+        }
+        map.createPane('pane_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11');
+        map.getPane('pane_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11').style.zIndex = 411;
+        map.getPane('pane_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11').style['mix-blend-mode'] = 'normal';
+        var layer_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11 = new L.geoJson(json_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11, { attribution: '', interactive: false, dataVar: 'json_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11', layerName: 'layer_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11', pane: 'pane_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11', onEachFeature: pop_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11, style: style_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11_0 });
+        bounds_group.addLayer(layer_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11);
+        map.addLayer(layer_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11);
+
+        function pop_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12(feature, layer) {
+            layer.on({ mouseout: function(e) { for (var i in e.target._eventParents) { if (typeof e.target._eventParents[i].resetStyle === 'function') e.target._eventParents[i].resetStyle(e.target); } }, mouseover: highlightFeature });
+            var props = ['Nome_muni','SIGM_Conta','Perimetro','created_us','created_da','last_edite','last_edi_1'];
+            var c = '<table>' + props.map(function(k){ return '<tr><td colspan="2">' + (feature.properties[k] !== null ? autolinker.link(String(feature.properties[k])) : '') + '</td></tr>'; }).join('') + '</table>';
+            layer.bindPopup(c, { maxHeight: 400 });
+        }
+        function style_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12_0() {
+            return { pane: 'pane_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12', opacity: 1, color: 'rgba(251,255,32,1.0)', dashArray: '25.0,5.0', lineCap: 'butt', lineJoin: 'miter', weight: 5.0, fill: true, fillOpacity: 1, fillColor: 'rgba(255,122,1,0.0)', interactive: false };
+        }
+        map.createPane('pane_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12');
+        map.getPane('pane_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12').style.zIndex = 412;
+        map.getPane('pane_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12').style['mix-blend-mode'] = 'normal';
+        var layer_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12 = new L.geoJson(json_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12, { attribution: '', interactive: false, dataVar: 'json_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12', layerName: 'layer_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12', pane: 'pane_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12', onEachFeature: pop_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12, style: style_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12_0 });
+        bounds_group.addLayer(layer_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12);
+        map.addLayer(layer_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12);
+
+        L.control.scale({position: 'bottomleft', maxWidth: 100, metric: true, imperial: false, updateWhenIdle: false}).addTo(map);
+        setBounds();
+
+// ========== CAMADA GEOJSON (LOTE UNIFICADO VIA FETCH) ==========
+
+var dadosOriginais = null;
+var layer_lotes;
+
+fetch("data/lotes_distritos_mapa.geojson")
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("Erro HTTP: " + response.status);
+    }
+    return response.json();
+  })
+  .then(data => {
+
+    dadosOriginais = data;
+
+    carregarDistritos();
+    carregarProprietarios();
+    
+    console.log("✅ GeoJSON carregado:", data); // DEBUG
+
+    layer_lotes = L.geoJson(data, {
+
+  style: function(feature) {
+
+    var situacao = getSituacao(feature);
+
+    var cor = "#4a90e2";
+
+    if (situacao.toUpperCase().includes("OCIOSO")){
+        cor = "#e57373";
+    }
+
+    var peso = situacao.includes("OCIOSO") ? 2 : 1;
+
+    if (situacao.includes("OCIOSO")){
+        peso = 2;
+    }
+
+    return {
+        color: "#ffffff",
+        weight: peso,
+        fillColor: cor,
+        fillOpacity: 0.55
+    };
+  },
+
+  onEachFeature: function(feature, layer){
+
+    layer.on({
+        mouseover: function(e){
+            e.target.setStyle({fillColor:"yellow",fillOpacity:0.8});
+        },
+        mouseout: function(e){
+            layer_lotes.resetStyle(e.target);
+        },
+        click: function(e){
+            layer_lotes.eachLayer(function(l){
+                layer_lotes.resetStyle(l);
+            });
+            e.target.setStyle({color:"#000",weight:0.7,fillOpacity:0.9});
+            map.fitBounds(e.target.getBounds(), {padding:[40,40]});
+        }
+    });
+
+    layer.bindPopup(buildLotePopup(feature.properties, layer), {
+        maxWidth: 320
+    });
+
+  }
+
+});
+
+    layer_lotes.addTo(map);
+    bounds_group.clearLayers();
+    bounds_group.addLayer(layer_lotes);
+
+    console.log("✅ Layer adicionada ao mapa");
+
+  })
+  .catch(function(err) {
+    console.error("❌ Erro ao carregar GeoJSON:", err);
+    alert("Erro ao carregar os lotes. Verifique o arquivo GeoJSON.");
+  });
+
+            var labelLayers = [
+            layer_RegioMetropolitana_1,
+            layer_LimiteDistritoRiachodasPedrasconformeaPlantadeParcelamentodoSolo_6,
+            layer_LimiteDistritoCINCOconformeaPlantadeParcelamentodoSoloAprovadaem121993_7,
+            layer_LimiteDistritoDrHlioPentagnaconformeaPlantadeParcelamentodoSoloLotesIndustriaisAprovadaemagostode2000_8,
+            layer_LimiteDistritoCINQUINHOconformeaPlantadeParcelamentodoSoloAprovadaem20091990_9,
+            layer_LimiteDistritoCincoconformeaPlantadeParcelamentodoSoloAprovadaem28101976_10,
+            layer_LimiteDistritoCidadeIndustrialconformeaPlantadeParcelamentodoSoloAprovadaem03091974_11,
+            layer_LimiteMunicipaldeContagemConformeaLeiComplementar362de28deSetembrode2023_12
+        ];
+        resetLabels(labelLayers);
+        map.on("zoomend",     function(){ resetLabels(labelLayers); });
+        map.on("layeradd",    function(){ resetLabels(labelLayers); });
+        map.on("layerremove", function(){ resetLabels(labelLayers); });
+// ===== LEGENDA PROFISSIONAL =====
+var legenda = L.control({position: 'bottomright'});
+
+legenda.onAdd = function(map) {
+
+var div = L.DomUtil.create('div', 'legenda-mapa');
+
+div.innerHTML = `
+<div class="legenda-titulo">Legenda</div>
+
+<div class="legenda-item">
+<span class="legenda-cor ativo"></span>
+<span>Lote Ativo</span>
+</div>
+
+<div class="legenda-item">
+<span class="legenda-cor ocioso"></span>
+<span>Lote Ocioso</span>
+</div>
+
+<div class="legenda-item">
+<span class="legenda-linha distrito"></span>
+<span>Limite Distritos Industriais</span>
+</div>
+`;
+
+return div;
+
+};
+
+legenda.addTo(map);
+
+
+// =======================
+// FILTROS
+// =======================
+function carregarDistritos(){
+
+var select = document.getElementById("filtro-distrito");
+
+var distritos = new Set();
+
+dadosOriginais.features.forEach(f => {
+
+let d = getProp(f, ["distrito", "Distrito"]);
+
+if(d){
+distritos.add(d);
+}
+
+});
+
+// limpar (mantém "Todos")
+select.innerHTML = '<option value="">Todos</option>';
+
+distritos.forEach(d => {
+var opt = document.createElement("option");
+opt.value = d;
+opt.textContent = d;
+select.appendChild(opt);
+});
+
+}
+
+function getProp(feature, nomes){
+    for(let i = 0; i < nomes.length; i++){
+        let valor = feature.properties[nomes[i]];
+        if(valor !== null && valor !== undefined && valor !== ""){
+            return valor;
+        }
+    }
+    return null;
+}
+
+function getSituacao(feature){
+    let situacao = feature.properties.situacao;
+
+    if(!situacao || situacao.trim() === ""){
+        return "ATIVO";
+    }
+
+    return situacao.trim().toUpperCase();
+}
+
+function aplicarFiltros(){
+
+if(!dadosOriginais){
+    console.warn("Dados ainda não carregados");
+    return;
+}
+
+var situacao = document.getElementById("filtro-situacao").value;
+var distrito = document.getElementById("filtro-distrito").value;
+var proprietario = document.getElementById("filtro-proprietario").value;
+
+if (layer_lotes && map.hasLayer(layer_lotes)) {
+    map.removeLayer(layer_lotes);
+}
+
+
+var filtrado = {
+"type": "FeatureCollection",
+"features": dadosOriginais.features.filter(f => {
+
+var ok = true;
+
+if(situacao){
+    let sit = getProp(f, ["situacao"]);
+    if(!sit){ sit = "ATIVO"; }
+    ok = ok && sit.toUpperCase() === situacao;
+}
+
+let distritoVal = getProp(f, ["distrito", "Distrito"]);
+
+if(distrito){
+    ok = ok && distritoVal === distrito;
+}
+
+let prop = getProp(f, ["proprietar", "Proprietar"]);
+
+if(proprietario){
+    let texto = (prop || "").toLowerCase();
+    ok = ok && texto.includes(proprietario.trim().toLowerCase());
+}
+
+return ok;
+
+})
+};
+
+layer_lotes = L.geoJson(filtrado, {
+
+style: function(feature){
+var situacao = getSituacao(feature);
+
+var cor = "#4a90e2";
+
+if (!situacao) situacao = "ATIVO";
+
+if (situacao.includes("OCIOSO")){
+    cor = "#e57373";
+}
+
+return {
+color:"#ffffff",
+weight:0.7,
+fillColor:cor,
+fillOpacity:0.55
+};
+},
+
+onEachFeature: function (feature, layer){
+
+layer.on({
+mouseover: function(e){
+e.target.setStyle({fillColor:"yellow",fillOpacity:0.8});
+},
+mouseout: function(e){
+layer_lotes.resetStyle(e.target);
+},
+click: function(e){
+layer_lotes.eachLayer(function(l){
+layer_lotes.resetStyle(l);
+});
+e.target.setStyle({color:"#000",weight:0.7,fillOpacity:0.9});
+map.fitBounds(e.target.getBounds(), {padding:[40,40]});
+}
+});
+
+layer.bindPopup(buildLotePopup(feature.properties, layer));
+
+}
+
+}).addTo(map);
+
+if (layer_lotes.getLayers().length > 0) {
+    map.fitBounds(layer_lotes.getBounds(), {padding:[40,40]});
+}
+
+}
+
+function carregarProprietarios(){
+
+var lista = new Set();
+
+dadosOriginais.features.forEach(f => {
+
+let p = getProp(f, ["proprietar", "Proprietar"]);
+
+if(p){
+p = p.trim();
+lista.add(p);
+}
+
+});
+
+window.listaProprietarios = Array.from(lista);
+
+}
+
+function limparFiltros(){
+
+document.getElementById("filtro-situacao").value = "";
+document.getElementById("filtro-distrito").value = "";
+document.getElementById("filtro-proprietario").value = "";
+
+if (layer_lotes && map.hasLayer(layer_lotes)) {
+    map.removeLayer(layer_lotes);
+}
+
+layer_lotes = L.geoJson(dadosOriginais, {
+
+    style: function(feature){
+
+        var situacao = getSituacao(feature);
+        var cor = "#4a90e2";
+
+        if (!situacao) situacao = "ATIVO";
+
+        if (situacao.includes("OCIOSO")){
+            cor = "#e57373";
+        }
+
+        return {
+            color:"#ffffff",
+            weight:0.7,
+            fillColor:cor,
+            fillOpacity:0.55
+        };
+    },
+
+    onEachFeature: function(feature, layer){
+        layer.bindPopup(buildLotePopup(feature.properties, layer));
+    }
+
+}).addTo(map);
+
+}
+
+let timeoutFiltro;
+
+document.getElementById("filtro-proprietario").addEventListener("input", function(){
+
+    var valor = this.value.toLowerCase();
+    var box = document.getElementById("lista-proprietarios");
+
+    box.innerHTML = "";
+
+    if(!valor){
+        box.style.display = "none";
+        return;
+    }
+
+    // ===== AUTOCOMPLETE (continua imediato) =====
+    var filtrados = window.listaProprietarios.filter(p =>
+        p.toLowerCase().includes(valor)
+    ).slice(0, 10);
+
+    filtrados.forEach(p => {
+        var div = document.createElement("div");
+        div.className = "autocomplete-item";
+        div.textContent = p;
+
+        div.onclick = function(){
+            document.getElementById("filtro-proprietario").value = p;
+            box.style.display = "none";
+            aplicarFiltros(); // aqui pode aplicar direto
+        };
+
+        box.appendChild(div);
+    });
+
+    if(filtrados.length > 0){
+    box.style.display = "block";
+}else{
+    box.style.display = "none";
+}
+
+    // ===== DEBOUNCE DO FILTRO =====
+    clearTimeout(timeoutFiltro);
+
+    timeoutFiltro = setTimeout(() => {
+        aplicarFiltros();
+    }, 300);
+
+});
+        </script>
+    </body>
+</html>
